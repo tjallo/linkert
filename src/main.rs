@@ -16,10 +16,12 @@ async fn fallback_route(uri: Uri) -> (StatusCode, String) {
     (StatusCode::NOT_FOUND, format!("Path {uri} not found!"))
 }
 
-fn create_router() -> Router<()> {
-    const HEALTHY_RESPONSE: &str = "{\"healthy\": true}";
+async fn health_route() -> (StatusCode, String) {
+    (StatusCode::OK, "{\"healthy\": true}".to_string())
+}
 
+fn create_router() -> Router<()> {
     Router::<()>::new()
-        .route("/health", get(|| async { HEALTHY_RESPONSE }))
+        .route("/health", get(health_route))
         .fallback(fallback_route)
 }
