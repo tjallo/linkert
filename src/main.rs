@@ -1,3 +1,5 @@
+mod json_objects;
+
 use axum::{
     Router,
     http::{StatusCode, Uri},
@@ -17,7 +19,7 @@ async fn fallback_route(uri: Uri) -> (StatusCode, String) {
 }
 
 async fn health_route() -> (StatusCode, String) {
-    (StatusCode::OK, "{\"healthy\": true}".to_string())
+    (StatusCode::OK, String::from("{\"healthy\": true}"))
 }
 
 fn create_router() -> Router<()> {

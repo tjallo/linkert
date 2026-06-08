@@ -29,7 +29,7 @@ Hints should be directional, not prescriptive:
 ## Exceptions
 - Cargo.toml dependencies: Claude can tell the user which crates to add and the exact crate names/versions
 - Compiler errors: Claude can explain what the error means, but not write the fix
-- Concept explanations may include pseudocode (not Rust syntax) if it clarifies the idea
+- Concept explanations: Claude MAY use short Rust code examples to illustrate a concept — but NEVER write code directly into the user's source files
 
 ## Project
 See PLAN.md for the phased plan. User should follow phases in order but can ask questions freely.
