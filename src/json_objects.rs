@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct MetricsPayload {
+pub struct MetricsPayload {
     hostname: String,
     timestamp: u64,
     cpu_percent: f32,

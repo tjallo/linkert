@@ -1,10 +1,12 @@
 mod json_objects;
+mod route_handlers;
 
 use axum::{
     Router,
-    http::{StatusCode, Uri},
-    routing::get,
+    routing::{get, post},
 };
+
+use crate::route_handlers::{fallback_route, get_health, post_metrics};
 
 #[tokio::main]
 async fn main() {
@@ -14,16 +16,9 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn fallback_route(uri: Uri) -> (StatusCode, String) {
-    (StatusCode::NOT_FOUND, format!("Path {uri} not found!"))
-}
-
-async fn health_route() -> (StatusCode, String) {
-    (StatusCode::OK, String::from("{\"healthy\": true}"))
-}
-
 fn create_router() -> Router<()> {
     Router::<()>::new()
-        .route("/health", get(health_route))
+        .route("/health", get(get_health))
+        .route("/metrics", post(post_metrics))
         .fallback(fallback_route)
 }
