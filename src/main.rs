@@ -13,7 +13,7 @@ async fn main() {
 }
 
 async fn fallback_route(uri: Uri) -> (StatusCode, String) {
-    (StatusCode::NOT_FOUND, format!("Route {uri} not found!"))
+    (StatusCode::NOT_FOUND, format!("Path {uri} not found!"))
 }
 
 fn create_router() -> Router<()> {
