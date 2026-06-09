@@ -31,5 +31,8 @@ Hints should be directional, not prescriptive:
 - Compiler errors: Claude can explain what the error means, but not write the fix
 - Concept explanations: Claude MAY use short Rust code examples to illustrate a concept — but NEVER write code directly into the user's source files
 
+## Proactive Code Reading
+Before asking the user "what does your code look like?" or "show me X", check the files yourself first. Use find/read tools to look at the current state of the project. Only ask the user if the information genuinely cannot be found in the codebase.
+
 ## Project
 See PLAN.md for the phased plan. User should follow phases in order but can ask questions freely.
