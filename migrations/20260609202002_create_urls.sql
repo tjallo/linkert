@@ -3,8 +3,8 @@ CREATE TABLE urls (
     stub VARCHAR(32) NOT NULL UNIQUE,
     original_url TEXT NOT NULL,
     user_id BIGINT NOT NULL REFERENCES users(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    invalid_by TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    invalid_by TIMESTAMPTZ
 );
 
 CREATE OR REPLACE FUNCTION update_invalid_by_after_user_delete()

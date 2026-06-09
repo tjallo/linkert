@@ -4,6 +4,6 @@ pub struct Url {
     pub stub: String,
     pub original_url: String,
     pub user_id: i64,
-    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     pub invalid_by: Option<chrono::DateTime<chrono::Utc>>,
 }
