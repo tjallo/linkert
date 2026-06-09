@@ -5,8 +5,6 @@ mod db;
 mod models;
 mod routes;
 
-use std::sync::{Arc, Mutex};
-
 use crate::{
     app_state::AppState,
     config::load_dotenv,
@@ -24,7 +22,7 @@ async fn main() {
 
     start_webserver(AppState {
         config_vars,
-        redis_connection: Arc::new(Mutex::new(redis_connection)),
+        redis_connection,
         postgres_connection,
     })
     .await
