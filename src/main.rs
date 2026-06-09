@@ -3,13 +3,23 @@ mod db;
 mod models;
 mod routes;
 
+use dotenvy::dotenv;
+
 use crate::{db::redis::connect_redis, routes::create_router};
 
 #[tokio::main]
 async fn main() {
     println!("Starting program...");
+    load_dotenv();
     let mut _redis_con = connect_redis();
     start_webserver().await
+}
+
+fn load_dotenv() {
+    match dotenv() {
+        Err(err) => panic!(".env file not found: {err:?}"),
+        Ok(_) => (),
+    }
 }
 
 async fn start_webserver() {
