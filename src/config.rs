@@ -12,16 +12,23 @@ pub struct ConfigVars {
     pub redis_url: String,
 }
 
-pub fn get_env_vars() -> ConfigVars {
+fn get_var(key: &str) -> String {
+    match std::env::var(key) {
+        Ok(var) => var,
+        Err(_) => panic!("Following var not found in .env: {key:?}"),
+    }
+}
+
+fn get_env_vars() -> ConfigVars {
     ConfigVars {
-        jwt_secret: std::env::var("JWT_SECRET").unwrap(),
-        postgres_user: std::env::var("POSTGRES_USER").unwrap(),
-        postgres_password: std::env::var("POSTGRES_PASSWORD").unwrap(),
-        postgres_db: std::env::var("POSTGRES_DB").unwrap(),
-        postgres_port: std::env::var("POSTGRES_PORT").unwrap(),
-        database_url: std::env::var("DATABASE_URL").unwrap(),
-        redis_port: std::env::var("REDIS_PORT").unwrap(),
-        redis_url: std::env::var("REDIS_URL").unwrap(),
+        jwt_secret: get_var("JWT_SECRET"),
+        postgres_user: get_var("POSTGRES_USER"),
+        postgres_password: get_var("POSTGRES_PASSWORD"),
+        postgres_db: get_var("POSTGRES_DB"),
+        postgres_port: get_var("POSTGRES_PORT"),
+        database_url: get_var("DATABASE_URL"),
+        redis_port: get_var("REDIS_PORT"),
+        redis_url: get_var("REDIS_URL"),
     }
 }
 
