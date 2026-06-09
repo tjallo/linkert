@@ -15,3 +15,9 @@ pub async fn create_user(state: AppState, user: CreateUserRequest) -> Result<Use
     .fetch_one(&state.postgres_connection)
     .await
 }
+
+pub async fn get_first_user(state: AppState) -> Result<User, sqlx::Error> {
+    sqlx::query_as!(User, "SELECT * FROM users LIMIT 1",)
+        .fetch_one(&state.postgres_connection)
+        .await
+}

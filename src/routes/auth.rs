@@ -13,6 +13,7 @@ pub async fn register(
     extract::State(state): extract::State<AppState>,
     extract::Json(user): extract::Json<CreateUserRequest>,
 ) -> (StatusCode, String) {
-    create_user(state, user).await;
-    (StatusCode::OK, String::from("{\"healthy\": true}"))
+    let user = create_user(state, user).await.unwrap();
+
+    (StatusCode::OK, String::from(user.username))
 }
