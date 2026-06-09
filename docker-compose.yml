@@ -2,4 +2,18 @@ services:
     valkey:
         image: valkey/valkey:9.1
         ports: 
-          - 6379:6379
+            - 6379:6379
+        restart: unless-stopped
+        
+    postgres:
+        image: postgres
+        restart: always
+        shm_size: 128mb
+        environment:
+            - POSTGRES_PASSWORD=example
+
+    adminer:
+        image: adminer
+        restart: unless-stopped
+        ports:
+        - 8080:8080
