@@ -1,16 +1,6 @@
 use dotenvy::dotenv;
 
-#[derive(Debug)]
-pub struct ConfigVars {
-    pub jwt_secret: String,
-    pub postgres_user: String,
-    pub postgres_password: String,
-    pub postgres_db: String,
-    pub postgres_port: String,
-    pub database_url: String,
-    pub redis_port: String,
-    pub redis_url: String,
-}
+use crate::app_state::ConfigVars;
 
 fn get_var(key: &str) -> String {
     match std::env::var(key) {
