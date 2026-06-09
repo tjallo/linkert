@@ -1,5 +1,5 @@
-pub fn connect_redis() -> redis::Connection {
-    let client_result = redis::Client::open("redis://127.0.0.1/");
+pub fn connect_redis(redis_url: &str) -> redis::Connection {
+    let client_result = redis::Client::open(redis_url);
 
     let connection_result = match client_result {
         Ok(client) => client.get_connection(),

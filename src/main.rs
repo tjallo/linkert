@@ -11,8 +11,8 @@ use crate::{config::load_dotenv, db::redis::connect_redis, server::start_webserv
 async fn main() {
     println!("Starting program...");
 
-    let _config_vars = load_dotenv();
-    let mut _redis_con = connect_redis();
+    let config = load_dotenv();
+    let mut _redis_con = connect_redis(&config.redis_url);
 
     start_webserver().await
 }

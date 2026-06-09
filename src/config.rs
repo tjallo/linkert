@@ -1,14 +1,15 @@
 use dotenvy::dotenv;
 
+#[derive(Debug)]
 pub struct ConfigVars {
-    jwt_secret: String,
-    postgres_user: String,
-    postgres_password: String,
-    postgres_db: String,
-    postgres_port: String,
-    database_url: String,
-    redis_port: String,
-    redis_url: String,
+    pub jwt_secret: String,
+    pub postgres_user: String,
+    pub postgres_password: String,
+    pub postgres_db: String,
+    pub postgres_port: String,
+    pub database_url: String,
+    pub redis_port: String,
+    pub redis_url: String,
 }
 
 pub fn get_env_vars() -> ConfigVars {
