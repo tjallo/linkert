@@ -1,15 +1,12 @@
-mod json_objects;
-mod route_handlers;
-
 use core::panic;
 
 use axum::{
-    Router,
+    Json, Router,
+    http::{StatusCode, Uri},
     routing::{get, post},
 };
 use redis::TypedCommands;
-
-use crate::route_handlers::{fallback_route, get_health, post_metrics};
+use serde::{Deserialize, Serialize};
 
 #[tokio::main]
 async fn main() {
@@ -63,4 +60,31 @@ fn create_router() -> Router<()> {
         .route("/health", get(get_health))
         .route("/metrics", post(post_metrics))
         .fallback(fallback_route)
+}
+
+async fn fallback_route(uri: Uri) -> (StatusCode, String) {
+    (StatusCode::NOT_FOUND, format!("Path {uri} not found!"))
+}
+
+async fn get_health() -> (StatusCode, String) {
+    (StatusCode::OK, String::from("{\"healthy\": true}"))
+}
+
+async fn post_metrics(Json(payload): Json<MetricsPayload>) -> (StatusCode, String) {
+    println!("Received: {:?}", payload);
+
+    (StatusCode::OK, String::from(format!("{:?}", payload)))
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MetricsPayload {
+    hostname: String,
+    timestamp: u64,
+    cpu_percent: f32,
+    mem_used_bytes: u64,
+    mem_total_bytes: u64,
+    disk_used_bytes: u64,
+    disk_total_bytes: u64,
+    net_rx_bytes: u64,
+    net_tx_bytes: u64,
 }
