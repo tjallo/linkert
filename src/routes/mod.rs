@@ -1,26 +1,31 @@
 pub mod auth;
-mod helpers;
+pub mod helpers;
 mod urls;
 
 use axum::{
-    Router,
+    Json, Router,
     routing::{get, post},
 };
+use utoipa::OpenApi;
 
 use crate::{
     AppState,
+    openapi::ApiDoc,
     routes::{
         auth::register,
-        helpers::{fallback_route, get_first_user_route, get_health},
+        helpers::{fallback_route, get_health},
     },
 };
 
 pub fn create_router(state: AppState) -> Router<()> {
-    Router::<AppState>::new()
+    let stateful = Router::new()
         .route("/health", get(get_health))
         .route("/auth/register", post(register))
         // TODO: Remove
-        .route("/getfirst", get(get_first_user_route))
         .fallback(fallback_route)
-        .with_state(state)
+        .with_state(state);
+
+    Router::new()
+        .merge(stateful)
+        .route("/openapi.json", get(|| async { Json(ApiDoc::openapi()) }))
 }

@@ -3,6 +3,8 @@ mod auth;
 mod config;
 mod db;
 mod models;
+mod openapi;
+mod responses;
 mod routes;
 
 use crate::{

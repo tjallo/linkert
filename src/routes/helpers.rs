@@ -1,23 +1,30 @@
 use axum::{
-    extract,
+    Json,
     http::{StatusCode, Uri},
 };
+use serde::Serialize;
+use utoipa::ToSchema;
 
-use crate::{app_state::AppState, db::repositories::user::get_first_user};
+use crate::responses::{ErrorEnvelope, ResponseEnvelope, health::HealthResponse};
 
-pub async fn get_health() -> (StatusCode, String) {
-    (StatusCode::OK, String::from("{\"healthy\": true}"))
+#[derive(Serialize, ToSchema)]
+pub struct HealthSuccessEnvelope {
+    pub success: bool,
+    pub data: HealthResponse,
+}
+
+#[utoipa::path(
+    get,
+    path = "/health",
+    responses(
+        (status = 200, description = "Service is healthy", body = HealthSuccessEnvelope),
+        (status = 500, description = "Service unhealthy", body = ErrorEnvelope),
+    )
+)]
+pub async fn get_health() -> Json<ResponseEnvelope<HealthResponse>> {
+    Json(ResponseEnvelope::ok(HealthResponse { healthy: true }))
 }
 
 pub async fn fallback_route(uri: Uri) -> (StatusCode, String) {
     (StatusCode::NOT_FOUND, format!("Path {uri} not found!"))
-}
-
-// TODO: Remove
-pub async fn get_first_user_route(
-    extract::State(state): extract::State<AppState>,
-) -> (StatusCode, String) {
-    let user = get_first_user(state).await.unwrap();
-
-    (StatusCode::OK, format!("{user:?}"))
 }

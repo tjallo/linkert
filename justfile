@@ -18,6 +18,7 @@ test:
 
 feature-test:
   just db-fresh
-  just run &
-  sleep 2
   deno test --allow-net
+
+openapi:
+  curl -s localhost:3000/openapi.json > api.json
