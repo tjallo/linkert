@@ -33,11 +33,18 @@ pub async fn register(
                 username: user.username,
             })),
         ),
-        Err(_) => (
-            StatusCode::CONFLICT,
-            Json(ResponseEnvelope::err(String::from(
-                "Failed to create user with that username, please try again",
-            ))),
-        ),
+        Err(err) => {
+            let is_conflict = err
+                .as_database_error()
+                .and_then(|e| e.code())
+                .map(|code| code == "23505")
+                .unwrap_or(false);
+
+            if is_conflict {
+                (StatusCode::CONFLICT, Json(ResponseEnvelope::err(String::from("Username already exists, retry with another username."))))
+            } else {
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseEnvelope::err(String::from("Internal server error, please try again."))))
+            }
+        }
     }
 }
