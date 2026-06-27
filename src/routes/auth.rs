@@ -14,12 +14,17 @@ pub struct CreateUserRequest {
     pub password: String,
 }
 
+const USER_SUCCESSFULLY_CREATED: &str = "Successfully created User";
+const USERNAME_IN_USE: &str = "Username already in use, try again";
+const SERVER_ERROR: &str = "Internal server error. Please try again.";
+
 #[utoipa::path(
     post,
     path = "/auth/register",
     responses(
-        (status = 200, description = "Successfully created User", body = inline(SuccessEnvelope<UserRegisterResponse>)),
-        (status = 409, description = "Username already in use, try again", body = inline(ErrorEnvelope)),
+        (status = 200, description = USER_SUCCESSFULLY_CREATED, body = inline(SuccessEnvelope<UserRegisterResponse>)),
+        (status = 409, description = USERNAME_IN_USE, body = inline(ErrorEnvelope)),
+        (status = 500, description = SERVER_ERROR, body = inline(ErrorEnvelope)),
     )
 )]
 pub async fn register(
@@ -41,10 +46,16 @@ pub async fn register(
                 .unwrap_or(false);
 
             if is_conflict {
-                (StatusCode::CONFLICT, Json(ResponseEnvelope::err(String::from("Username already exists, retry with another username."))))
-            } else {
-                (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseEnvelope::err(String::from("Internal server error, please try again."))))
+                return (
+                    StatusCode::CONFLICT,
+                    Json(ResponseEnvelope::err(USERNAME_IN_USE.to_string())),
+                );
             }
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ResponseEnvelope::err(SERVER_ERROR.to_string())),
+            )
         }
     }
 }
