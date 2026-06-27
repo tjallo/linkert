@@ -1,19 +1,37 @@
-use axum::{extract, http::StatusCode};
+use axum::{Json, extract};
 use serde::Deserialize;
+use utoipa::ToSchema;
 
-use crate::{app_state::AppState, db::repositories::user::create_user};
+use crate::{
+    app_state::AppState,
+    db::repositories::user::create_user,
+    responses::{ErrorEnvelope, ResponseEnvelope, SuccessEnvelope, auth::UserRegisterResponse},
+};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct CreateUserRequest {
     pub username: String,
     pub password: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/auth/register",
+    responses(
+        (status = 200, description = "Successfully created User", body = inline(SuccessEnvelope<UserRegisterResponse>)),
+        (status = 409, description = "Username already in use, try again", body = inline(ErrorEnvelope)),
+    )
+)]
 pub async fn register(
     extract::State(state): extract::State<AppState>,
     extract::Json(user): extract::Json<CreateUserRequest>,
-) -> (StatusCode, String) {
-    let user = create_user(state, user).await.unwrap();
-
-    (StatusCode::OK, String::from(user.username))
+) -> Json<ResponseEnvelope<UserRegisterResponse>> {
+    match create_user(state, user).await {
+        Ok(user) => Json(ResponseEnvelope::ok(UserRegisterResponse {
+            username: user.username,
+        })),
+        Err(_) => Json(ResponseEnvelope::err(String::from(
+            "Failed to create user with that username, please try again",
+        ))),
+    }
 }
