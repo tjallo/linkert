@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "gen-types": "deno run -A npm:openapi-typescript api.json -o tests/types.gen.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1"

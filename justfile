@@ -22,3 +22,7 @@ feature-test:
 
 openapi:
   curl -s localhost:3000/openapi.json > api.json
+
+gen-types:
+  just openapi
+  deno task gen-types
