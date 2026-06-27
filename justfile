@@ -15,3 +15,7 @@ check:
 
 test:
     cargo test
+
+feature-test:
+    just db-fresh
+    deno test
