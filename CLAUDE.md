@@ -36,3 +36,6 @@ Before asking the user "what does your code look like?" or "show me X", check th
 
 ## Project
 See PLAN.md for the phased plan. User should follow phases in order but can ask questions freely.
+
+## API Spec
+See `api.yaml` (OpenAPI 3.0) for the current API spec. Keep it in sync — when a route is added or changed, update `api.yaml` to match.

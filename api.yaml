@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: Linkert
+  description: Self-hosted URL shortener
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  healthy:
+                    type: boolean
+                    example: true
+
+  /auth/register:
+    post:
+      summary: Register a new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                  example: tjalle
+                password:
+                  type: string
+                  example: hunter2
+      responses:
+        "200":
+          description: User created, returns username
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: tjalle
