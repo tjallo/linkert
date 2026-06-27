@@ -1,13 +1,10 @@
 use utoipa::OpenApi;
 
-use crate::{
-    responses::{ErrorEnvelope, health::HealthResponse},
-    routes::helpers::HealthSuccessEnvelope,
-};
+use crate::responses::{ErrorEnvelope, health::HealthResponse};
 
 #[derive(OpenApi)]
 #[openapi(
     paths(crate::routes::helpers::get_health),
-    components(schemas(HealthResponse, HealthSuccessEnvelope, ErrorEnvelope))
+    components(schemas(HealthResponse, ErrorEnvelope))
 )]
 pub struct ApiDoc;
