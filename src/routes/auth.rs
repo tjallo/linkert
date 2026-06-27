@@ -1,4 +1,4 @@
-use axum::{Json, extract};
+use axum::{Json, extract, http::StatusCode};
 use serde::Deserialize;
 use utoipa::ToSchema;
 
@@ -25,13 +25,19 @@ pub struct CreateUserRequest {
 pub async fn register(
     extract::State(state): extract::State<AppState>,
     extract::Json(user): extract::Json<CreateUserRequest>,
-) -> Json<ResponseEnvelope<UserRegisterResponse>> {
+) -> (StatusCode, Json<ResponseEnvelope<UserRegisterResponse>>) {
     match create_user(state, user).await {
-        Ok(user) => Json(ResponseEnvelope::ok(UserRegisterResponse {
-            username: user.username,
-        })),
-        Err(_) => Json(ResponseEnvelope::err(String::from(
-            "Failed to create user with that username, please try again",
-        ))),
+        Ok(user) => (
+            StatusCode::OK,
+            Json(ResponseEnvelope::ok(UserRegisterResponse {
+                username: user.username,
+            })),
+        ),
+        Err(_) => (
+            StatusCode::CONFLICT,
+            Json(ResponseEnvelope::err(String::from(
+                "Failed to create user with that username, please try again",
+            ))),
+        ),
     }
 }
