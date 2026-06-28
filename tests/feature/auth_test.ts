@@ -14,8 +14,20 @@ type RegisterInvalidBody =
 type RegisterBody =
   operations["register"]["requestBody"]["content"]["application/json"];
 
+type LoginOk =
+  operations["login"]["responses"][200]["content"]["application/json"];
+
+type LoginUnauthorized =
+  operations["login"]["responses"][401]["content"]["application/json"];
+
+type LoginBody =
+  operations["login"]["requestBody"]["content"]["application/json"];
+
 const TEST_USERNAME = "test_user";
 const TEST_PASSWORD = "hunter2hunter2hunter2";
+
+const LOGIN_USERNAME = "login_user";
+const LOGIN_PASSWORD = "correcthorsebattery";
 
 function registerUser(username: string, password: string) {
   const body: RegisterBody = {
@@ -24,6 +36,19 @@ function registerUser(username: string, password: string) {
   };
 
   return fetch(url("/auth/register"), {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+function loginUser(username: string, password: string) {
+  const body: LoginBody = {
+    username,
+    password,
+  };
+
+  return fetch(url("/auth/login"), {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
@@ -85,4 +110,26 @@ Deno.test("POST /auth/register username at exact min length (3 chars) returns 20
 
   assertEquals(res.status, 200);
   assertEquals(json.success, true);
+});
+
+Deno.test("POST /auth/login with valid credentials returns 200", async () => {
+  await registerUser(LOGIN_USERNAME, LOGIN_PASSWORD);
+
+  const res = await loginUser(LOGIN_USERNAME, LOGIN_PASSWORD);
+  const json: LoginOk = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(json.success, true);
+  assertEquals(typeof json.data.jwt, "string");
+  assertEquals(typeof json.data.refresh_token, "string");
+});
+
+Deno.test("POST /auth/login with wrong password returns 401", async () => {
+  await registerUser(LOGIN_USERNAME, LOGIN_PASSWORD);
+
+  const res = await loginUser(LOGIN_USERNAME, "wrongpasswordwrong");
+  const json: LoginUnauthorized = await res.json();
+
+  assertEquals(res.status, 401);
+  assertEquals(json.success, false);
 });

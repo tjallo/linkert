@@ -95,6 +95,18 @@ pub struct LoginUserRequest {
     pub device_name: Option<String>,
 }
 
+const LOGIN_SUCCESSFUL: &str = "Successfully logged in";
+const LOGIN_UNAUTHORIZED: &str = "Invalid credentials";
+
+#[utoipa::path(
+    post,
+    path = "/auth/login",
+    responses(
+        (status = 200, description = LOGIN_SUCCESSFUL, body = inline(SuccessEnvelope<UserLoginResponse>)),
+        (status = 401, description = LOGIN_UNAUTHORIZED, body = inline(ErrorEnvelope)),
+        (status = 422, description = UNPROCESSABLE_ENTITY, body = inline(ErrorEnvelope)),
+    )
+)]
 #[axum::debug_handler]
 pub async fn login(
     extract::State(state): extract::State<AppState>,

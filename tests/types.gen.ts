@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/register": {
         parameters: {
             query?: never;
@@ -52,6 +68,15 @@ export interface components {
         HealthResponse: {
             healthy: boolean;
         };
+        LoginUserRequest: {
+            device_name?: string | null;
+            password: string;
+            username: string;
+        };
+        UserLoginResponse: {
+            jwt: string;
+            refresh_token: string;
+        };
         UserRegisterResponse: {
             username: string;
         };
@@ -64,6 +89,63 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginUserRequest"];
+            };
+        };
+        responses: {
+            /** @description Successfully logged in */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            jwt: string;
+                            refresh_token: string;
+                        };
+                        /** @enum {boolean} */
+                        success: true;
+                    };
+                };
+            };
+            /** @description Invalid credentials */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                        /** @enum {boolean} */
+                        success: false;
+                    };
+                };
+            };
+            /** @description Invalid body given. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                        /** @enum {boolean} */
+                        success: false;
+                    };
+                };
+            };
+        };
+    };
     register: {
         parameters: {
             query?: never;
