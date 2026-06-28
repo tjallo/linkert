@@ -105,6 +105,19 @@ export interface operations {
                     };
                 };
             };
+            /** @description Invalid body given. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error: string;
+                        /** @enum {boolean} */
+                        success: false;
+                    };
+                };
+            };
             /** @description Internal server error. Please try again. */
             500: {
                 headers: {

@@ -2,7 +2,7 @@ run:
   cargo run
 
 db-fresh:
-  docker compose down -v && docker compose up -d --wait && sleep 1 && sqlx migrate run
+  docker compose down -v && docker compose up -d --wait && sqlx migrate run
 
 watch:
   cargo watch -x run
