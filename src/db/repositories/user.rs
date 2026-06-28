@@ -1,5 +1,3 @@
-use std::fmt::Error;
-
 use crate::{
     app_state::AppState,
     auth::password::{hash_password, verify_password_hash},
@@ -28,12 +26,15 @@ async fn get_user(state: AppState, username: String) -> Result<User, sqlx::Error
 
 const DUMMY_HASH: &str = "$argon2id$v=19$m=19456,t=2,p=1$WZL8yyemsTlsd/Yi7uxaww$kHxBnE5XxhGn1Dr00328BBsIEWH+jGIvsCNaFoO5i1A";
 
-pub async fn validate_user_login(state: AppState, user: &LoginUserRequest) -> bool {
-    match get_user(state, user.username.clone()).await {
-        Ok(user_db) => verify_password_hash(&user.password, &user_db.password),
+pub async fn validate_user_login(state: AppState, user_request: &LoginUserRequest) -> Option<User> {
+    match get_user(state, user_request.username.clone()).await {
+        Ok(user) => {
+            verify_password_hash(&user.password, &user.password);
+            Some(user)
+        }
         Err(_) => {
             verify_password_hash("", DUMMY_HASH);
-            false
+            None
         }
     }
 }

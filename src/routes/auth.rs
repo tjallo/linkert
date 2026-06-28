@@ -1,14 +1,18 @@
 use axum::{Json, extract, http::StatusCode};
 use axum_extra::TypedHeader;
-use garde::Validate;
+use garde::{Validate, rules::length};
 use headers::UserAgent;
 use serde::Deserialize;
 use utoipa::ToSchema;
 
 use crate::{
     app_state::AppState,
+    auth::jwt::jwt_encode,
     db::repositories::user::{create_user, validate_user_login},
-    responses::{ErrorEnvelope, ResponseEnvelope, SuccessEnvelope, auth::UserRegisterResponse},
+    responses::{
+        ErrorEnvelope, ResponseEnvelope, SuccessEnvelope,
+        auth::{UserLoginResponse, UserRegisterResponse},
+    },
 };
 
 #[derive(Deserialize, ToSchema, Validate)]
@@ -84,7 +88,7 @@ pub struct LoginUserRequest {
     pub username: String,
     #[garde(ascii)]
     pub password: String,
-    #[garde(ascii)]
+    #[garde(length(max = 32))]
     pub device_name: Option<String>,
 }
 
@@ -93,7 +97,7 @@ pub async fn login(
     extract::State(state): extract::State<AppState>,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     extract::Json(user): extract::Json<LoginUserRequest>,
-) -> (StatusCode, Json<ResponseEnvelope<UserRegisterResponse>>) {
+) -> (StatusCode, Json<ResponseEnvelope<UserLoginResponse>>) {
     if let Err(e) = user.validate() {
         return (
             StatusCode::UNPROCESSABLE_ENTITY,
@@ -105,21 +109,29 @@ pub async fn login(
         );
     }
 
-    if !validate_user_login(state, &user).await {
+    let Some(user) = validate_user_login(state.clone(), &user).await else {
         return (
             StatusCode::UNAUTHORIZED,
             Json(ResponseEnvelope::err(String::from(
                 "You are not authorized to login.",
             ))),
         );
-    }
+    };
+
+    let Some(jwt) = jwt_encode(state, user) else {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(ResponseEnvelope::err(String::from(
+                "You are not authorized to login.",
+            ))),
+        );
+    };
 
     (
-        StatusCode::UNPROCESSABLE_ENTITY,
-        Json(ResponseEnvelope::err(format!(
-            "{:?}, {}",
-            user,
-            user_agent.to_string()
-        ))),
+        StatusCode::OK,
+        Json(ResponseEnvelope::ok(UserLoginResponse {
+            jwt,
+            refresh_token: String::from("refresh_token"),
+        })),
     )
 }
