@@ -7,7 +7,7 @@ use utoipa::ToSchema;
 
 use crate::{
     app_state::AppState,
-    db::repositories::user::create_user,
+    db::repositories::user::{create_user, validate_user_login},
     responses::{ErrorEnvelope, ResponseEnvelope, SuccessEnvelope, auth::UserRegisterResponse},
 };
 
@@ -79,7 +79,7 @@ pub async fn register(
 }
 
 #[derive(Deserialize, ToSchema, Validate, Debug)]
-pub struct UserLoginRequest {
+pub struct LoginUserRequest {
     #[garde(pattern("^[a-zA-Z0-9_-]+$"))]
     pub username: String,
     #[garde(ascii)]
@@ -92,7 +92,7 @@ pub struct UserLoginRequest {
 pub async fn login(
     extract::State(state): extract::State<AppState>,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
-    extract::Json(user): extract::Json<UserLoginRequest>,
+    extract::Json(user): extract::Json<LoginUserRequest>,
 ) -> (StatusCode, Json<ResponseEnvelope<UserRegisterResponse>>) {
     if let Err(e) = user.validate() {
         return (
@@ -101,6 +101,15 @@ pub async fn login(
                 "{}: {}",
                 StatusCode::UNPROCESSABLE_ENTITY,
                 e
+            ))),
+        );
+    }
+
+    if !validate_user_login(state, &user).await {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(ResponseEnvelope::err(String::from(
+                "You are not authorized to login.",
             ))),
         );
     }

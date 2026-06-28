@@ -16,10 +16,11 @@ pub fn hash_password(password: &str) -> String {
     }
 }
 
-pub fn verify_password(password: &str, hash: &str) -> bool {
-    let parsed_hash = PasswordHash::new(&hash).unwrap();
-
-    Argon2::default()
-        .verify_password(password.as_bytes(), &parsed_hash)
-        .is_ok()
+pub fn verify_password_hash(password: &str, hash: &str) -> bool {
+    match PasswordHash::new(&hash) {
+        Ok(parsed_hash) => Argon2::default()
+            .verify_password(password.as_bytes(), &parsed_hash)
+            .is_ok(),
+        Err(_) => false,
+    }
 }
