@@ -8,7 +8,10 @@ use utoipa::ToSchema;
 use crate::{
     app_state::AppState,
     auth::jwt::jwt_encode,
-    db::repositories::user::{create_user, validate_user_login},
+    db::repositories::{
+        refresh_token::create_refresh_token,
+        user::{create_user, validate_user_login},
+    },
     responses::{
         ErrorEnvelope, ResponseEnvelope, SuccessEnvelope,
         auth::{UserLoginResponse, UserRegisterResponse},
@@ -96,9 +99,9 @@ pub struct LoginUserRequest {
 pub async fn login(
     extract::State(state): extract::State<AppState>,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
-    extract::Json(user): extract::Json<LoginUserRequest>,
+    extract::Json(user_login_req): extract::Json<LoginUserRequest>,
 ) -> (StatusCode, Json<ResponseEnvelope<UserLoginResponse>>) {
-    if let Err(e) = user.validate() {
+    if let Err(e) = user_login_req.validate() {
         return (
             StatusCode::UNPROCESSABLE_ENTITY,
             Json(ResponseEnvelope::err(format!(
@@ -109,7 +112,7 @@ pub async fn login(
         );
     }
 
-    let Some(user) = validate_user_login(state.clone(), &user).await else {
+    let Some(user) = validate_user_login(state.clone(), &user_login_req).await else {
         return (
             StatusCode::UNAUTHORIZED,
             Json(ResponseEnvelope::err(String::from(
@@ -118,7 +121,23 @@ pub async fn login(
         );
     };
 
-    let Some(jwt) = jwt_encode(state, user) else {
+    let Some(jwt) = jwt_encode(state.clone(), &user) else {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(ResponseEnvelope::err(String::from(
+                "You are not authorized to login.",
+            ))),
+        );
+    };
+
+    let Ok(refresh_token) = create_refresh_token(
+        &state,
+        &user,
+        Some(&user_agent.as_str()),
+        user_login_req.device_name.as_deref(),
+    )
+    .await
+    else {
         return (
             StatusCode::UNAUTHORIZED,
             Json(ResponseEnvelope::err(String::from(
@@ -131,7 +150,7 @@ pub async fn login(
         StatusCode::OK,
         Json(ResponseEnvelope::ok(UserLoginResponse {
             jwt,
-            refresh_token: String::from("refresh_token"),
+            refresh_token: refresh_token.refresh_token,
         })),
     )
 }

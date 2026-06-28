@@ -16,14 +16,14 @@ struct Claims {
 
 const JWT_EXPIRY_IN_MINUTES: i64 = 60;
 
-pub fn jwt_encode(state: AppState, user: User) -> Option<String> {
+pub fn jwt_encode(state: AppState, user: &User) -> Option<String> {
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
     let nbf = iat;
     let exp = (now + chrono::Duration::minutes(JWT_EXPIRY_IN_MINUTES)).timestamp() as usize;
 
     let claims = Claims {
-        sub: user.username,
+        sub: user.username.clone(),
         user_id: user.id,
         iat,
         nbf,
