@@ -30,7 +30,7 @@ function registerUser(username: string, password: string) {
   });
 }
 
-Deno.test("POST /auth/register returns 200 with proper response: true", async () => {
+Deno.test("POST /auth/register returns 200 with created username", async () => {
   const res = await registerUser(TEST_USERNAME, TEST_PASSWORD);
   const json: RegisterOk = await res.json();
 
@@ -39,42 +39,50 @@ Deno.test("POST /auth/register returns 200 with proper response: true", async ()
   assertEquals(json.data.username, TEST_USERNAME);
 });
 
-Deno.test("POST /auth/register duplicate register returns 409 with response: false", async () => {
+Deno.test("POST /auth/register duplicate username returns 409", async () => {
   const res = await registerUser(TEST_USERNAME, TEST_PASSWORD);
   const json: RegisterDuplicateUsername = await res.json();
-
-  console.info(json.error);
 
   assertEquals(res.status, 409);
   assertEquals(json.success, false);
 });
 
-Deno.test("POST /auth/register create username with empty username/password, returns with 422 response: false", async () => {
+Deno.test("POST /auth/register empty username and password returns 422", async () => {
   const res = await registerUser("", "");
   const json: RegisterInvalidBody = await res.json();
 
-  console.info(json.error);
-
   assertEquals(res.status, 422);
   assertEquals(json.success, false);
 });
 
-Deno.test("POST /auth/register create username with short username, returns with 422 response: false", async () => {
+Deno.test("POST /auth/register username under 3 chars returns 422", async () => {
   const res = await registerUser("as", TEST_PASSWORD);
   const json: RegisterInvalidBody = await res.json();
 
-  console.info(json.error);
+  assertEquals(res.status, 422);
+  assertEquals(json.success, false);
+});
+
+Deno.test("POST /auth/register password under 15 chars returns 422", async () => {
+  const res = await registerUser("validuser", "tooshort");
+  const json: RegisterInvalidBody = await res.json();
 
   assertEquals(res.status, 422);
   assertEquals(json.success, false);
 });
 
-Deno.test("POST /auth/register create username with short password, returns with 422 response: false", async () => {
-  const res = await registerUser("asdf123", "tooshort");
+Deno.test("POST /auth/register username with invalid characters returns 422", async () => {
+  const res = await registerUser("user@name!", TEST_PASSWORD);
   const json: RegisterInvalidBody = await res.json();
-
-  console.info(json.error);
 
   assertEquals(res.status, 422);
   assertEquals(json.success, false);
+});
+
+Deno.test("POST /auth/register username at exact min length (3 chars) returns 200", async () => {
+  const res = await registerUser("abc", TEST_PASSWORD);
+  const json: RegisterOk = await res.json();
+
+  assertEquals(res.status, 200);
+  assertEquals(json.success, true);
 });
