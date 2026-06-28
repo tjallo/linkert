@@ -12,7 +12,7 @@ use crate::{
     AppState,
     openapi::ApiDoc,
     routes::{
-        auth::register,
+        auth::{login, register},
         helpers::{fallback_route, get_health},
     },
 };
@@ -21,7 +21,7 @@ pub fn create_router(state: AppState) -> Router<()> {
     let stateful = Router::new()
         .route("/health", get(get_health))
         .route("/auth/register", post(register))
-        // TODO: Remove
+        .route("/auth/login", post(login))
         .fallback(fallback_route)
         .with_state(state);
 

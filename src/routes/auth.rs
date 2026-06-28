@@ -1,5 +1,7 @@
 use axum::{Json, extract, http::StatusCode};
+use axum_extra::TypedHeader;
 use garde::Validate;
+use headers::UserAgent;
 use serde::Deserialize;
 use utoipa::ToSchema;
 
@@ -13,7 +15,7 @@ use crate::{
 pub struct CreateUserRequest {
     #[garde(pattern("^[a-zA-Z0-9_-]+$"), length(min = 3))]
     pub username: String,
-    #[garde(length(min = 15, max = 128))]
+    #[garde(ascii, length(min = 15, max = 128))]
     pub password: String,
 }
 
@@ -74,4 +76,41 @@ pub async fn register(
             )
         }
     }
+}
+
+#[derive(Deserialize, ToSchema, Validate, Debug)]
+pub struct UserLoginRequest {
+    #[garde(pattern("^[a-zA-Z0-9_-]+$"))]
+    pub username: String,
+    #[garde(ascii)]
+    pub password: String,
+    #[garde(ascii)]
+    pub device_name: Option<String>,
+}
+
+#[axum::debug_handler]
+pub async fn login(
+    extract::State(state): extract::State<AppState>,
+    TypedHeader(user_agent): TypedHeader<UserAgent>,
+    extract::Json(user): extract::Json<UserLoginRequest>,
+) -> (StatusCode, Json<ResponseEnvelope<UserRegisterResponse>>) {
+    if let Err(e) = user.validate() {
+        return (
+            StatusCode::UNPROCESSABLE_ENTITY,
+            Json(ResponseEnvelope::err(format!(
+                "{}: {}",
+                StatusCode::UNPROCESSABLE_ENTITY,
+                e
+            ))),
+        );
+    }
+
+    (
+        StatusCode::UNPROCESSABLE_ENTITY,
+        Json(ResponseEnvelope::err(format!(
+            "{:?}, {}",
+            user,
+            user_agent.to_string()
+        ))),
+    )
 }

@@ -1,7 +1,10 @@
 use serde::Serialize;
 use utoipa::{
     ToSchema,
-    openapi::{RefOr, Schema, schema::{ObjectBuilder, SchemaType, Type}},
+    openapi::{
+        RefOr, Schema,
+        schema::{ObjectBuilder, SchemaType, Type},
+    },
 };
 
 pub mod auth;
@@ -32,7 +35,10 @@ pub struct ErrorEnvelope {
 
 impl ErrorEnvelope {
     pub fn new(error: String) -> Self {
-        Self { success: false, error }
+        Self {
+            success: false,
+            error,
+        }
     }
 }
 
